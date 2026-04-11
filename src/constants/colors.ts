@@ -20,6 +20,7 @@ export const COLORS = {
   green: '#16a34a',
   greenLight: '#f0fdf4',
   yellow: '#d97706',
+  yellowLight: '#fefce8',
   black: '#000000',
   overlay: 'rgba(10, 30, 61, 0.55)',
 };
