@@ -13,7 +13,7 @@ export default function App() {
       <AuthContextProvider>
         <BookingProvider>
           <ToastProvider>
-            <StatusBar style="light" hidden={false} />
+            <StatusBar style="light" />
             <AppNavigator />
             <ToastContainer />
           </ToastProvider>
