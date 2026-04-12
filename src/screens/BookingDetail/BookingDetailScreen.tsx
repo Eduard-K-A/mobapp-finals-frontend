@@ -21,7 +21,7 @@ type Props = {
 
 const CANCELLATION_FEE_PERCENT = 0.15;
 const pickerOverlay = { flex: 1, justifyContent: 'flex-end' as const, backgroundColor: 'rgba(0,0,0,0.4)' };
-const pickerSheet = { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingBottom: 32 };
+const pickerSheet = { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingBottom: 32, alignItems: 'center' as const };
 
 const fmt = (d: string) =>
   new Date(d).toLocaleDateString('en-PH', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' });
@@ -262,7 +262,10 @@ export default function BookingDetailScreen({ navigation, route }: Props) {
             <Text style={styles.modalLabel}>New Check-in</Text>
             <TouchableOpacity
               style={styles.dateBox2}
-              onPress={() => setShowPickerIn(true)}
+              onPress={() => {
+                if (!newCheckIn) setNewCheckIn(today);
+                setShowPickerIn(true);
+              }}
             >
               <Text style={styles.dateLabel2}>CHECK-IN</Text>
               <Text style={newCheckIn ? styles.dateValue2 : styles.datePlaceholder2}>
@@ -273,14 +276,19 @@ export default function BookingDetailScreen({ navigation, route }: Props) {
             <Text style={[styles.modalLabel, { marginTop: 12 }]}>New Check-out</Text>
             <TouchableOpacity
               style={styles.dateBox2}
-              onPress={() => setShowPickerOut(true)}
+              onPress={() => {
+                if (!newCheckOut) {
+                  const base = newCheckIn || today;
+                  setNewCheckOut(new Date(base.getTime() + 86400000));
+                }
+                setShowPickerOut(true);
+              }}
             >
               <Text style={styles.dateLabel2}>CHECK-OUT</Text>
               <Text style={newCheckOut ? styles.dateValue2 : styles.datePlaceholder2}>
                 {newCheckOut ? fmtShort(newCheckOut) : 'Select date'}
               </Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.modalSaveBtn} onPress={handleReschedule}>
               <Text style={styles.modalSaveBtnText}>Confirm Reschedule</Text>
             </TouchableOpacity>
@@ -294,10 +302,18 @@ export default function BookingDetailScreen({ navigation, route }: Props) {
       <Modal visible={showPickerIn} transparent animationType="slide">
         <TouchableOpacity style={pickerOverlay} activeOpacity={1} onPress={() => setShowPickerIn(false)}>
           <View style={pickerSheet}>
+            <View style={styles.pickerHeader}>
+              <Text style={styles.pickerTitle}>Select Check-in Date</Text>
+              <TouchableOpacity onPress={() => setShowPickerIn(false)}>
+                <Text style={styles.pickerDone}>Done</Text>
+              </TouchableOpacity>
+            </View>
             <DateTimePicker
               value={newCheckIn ?? today}
               mode="date"
               display={Platform.OS === 'ios' ? 'inline' : 'default'}
+              themeVariant="light"
+              accentColor={COLORS.gold}
               minimumDate={today}
               onChange={(_, date) => {
                 if (Platform.OS === 'android') setShowPickerIn(false);
@@ -311,10 +327,18 @@ export default function BookingDetailScreen({ navigation, route }: Props) {
       <Modal visible={showPickerOut} transparent animationType="slide">
         <TouchableOpacity style={pickerOverlay} activeOpacity={1} onPress={() => setShowPickerOut(false)}>
           <View style={pickerSheet}>
+            <View style={styles.pickerHeader}>
+              <Text style={styles.pickerTitle}>Select Check-out Date</Text>
+              <TouchableOpacity onPress={() => setShowPickerOut(false)}>
+                <Text style={styles.pickerDone}>Done</Text>
+              </TouchableOpacity>
+            </View>
             <DateTimePicker
               value={newCheckOut ?? (newCheckIn ? new Date(newCheckIn.getTime() + 86400000) : today)}
               mode="date"
               display={Platform.OS === 'ios' ? 'inline' : 'default'}
+              themeVariant="light"
+              accentColor={COLORS.gold}
               minimumDate={newCheckIn ? new Date(newCheckIn.getTime() + 86400000) : new Date(today.getTime() + 86400000)}
               onChange={(_, date) => {
                 if (Platform.OS === 'android') setShowPickerOut(false);

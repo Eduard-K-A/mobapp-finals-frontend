@@ -34,7 +34,7 @@ export default function BookingSuccessScreen({ navigation, route }: Props) {
   const goBookings = () =>
     navigation.reset({
       index: 0,
-      routes: [{ name: 'MainTabs', state: { routes: [{ name: 'MyBookings' }], index: 2 } }],
+      routes: [{ name: 'MainTabs', params: { screen: 'MyBookings' } }],
     });
 
   return (

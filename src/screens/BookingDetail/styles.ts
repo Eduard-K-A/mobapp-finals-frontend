@@ -58,4 +58,28 @@ export default StyleSheet.create({
   dateLabel2: { fontSize: 11, color: COLORS.gray400, marginBottom: 4 },
   dateValue2: { fontSize: 14, fontWeight: 'bold', color: COLORS.navy },
   datePlaceholder2: { fontSize: 14, color: COLORS.gray300 },
+  // Picker Styles
+  pickerHeader: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.gray100,
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  pickerTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.navy,
+  },
+  pickerDone: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.gold,
+  },
 });

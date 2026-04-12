@@ -21,7 +21,7 @@ type Props = {
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const pickerOverlay = { flex: 1, justifyContent: 'flex-end' as const, backgroundColor: 'rgba(0,0,0,0.4)' };
-const pickerSheet = { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingBottom: 32 };
+const pickerSheet = { backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, paddingBottom: 32, alignItems: 'center' as const };
 
 const fmtDate = (d: Date) =>
   d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -34,7 +34,7 @@ export default function RoomDetailScreen({ navigation, route }: Props) {
   const { rooms } = useRooms();
   const room = rooms.find(r => r.id === roomId);
   const { showToast } = useToast();
-  const { bookings, reviews, addBooking } = useBookings();
+  const { bookings, reviews, addBooking, isRoomBooked } = useBookings();
   const { user } = useAuth();
 
   const [checkIn, setCheckIn] = useState<Date | null>(null);
@@ -62,18 +62,13 @@ export default function RoomDetailScreen({ navigation, route }: Props) {
       : 0;
   const totalPrice = nights * room.pricePerNight;
 
-  const isDateConflict = () => {
-    if (!checkIn || !checkOut) return false;
-    return bookings.some(b => {
-      if (b.room.id !== roomId || b.userId !== user?.id) return false;
-      return checkIn < new Date(b.checkOutDate) && checkOut > new Date(b.checkInDate);
-    });
-  };
+  const isConflict =
+    checkIn && checkOut && isRoomBooked(roomId, checkIn.toISOString(), checkOut.toISOString());
 
   const handleBook = () => {
     if (!checkIn || !checkOut) { showToast('Please select check-in and check-out dates', 'error'); return; }
     if (nights <= 0) { showToast('Check-out must be after check-in', 'error'); return; }
-    if (isDateConflict()) { showToast('You already have a booking for these dates', 'error'); return; }
+    if (isConflict) { showToast('These dates are already booked. Please choose different dates.', 'error'); return; }
     setModalVisible(true);
   };
 
@@ -162,13 +157,28 @@ export default function RoomDetailScreen({ navigation, route }: Props) {
               <Text style={styles.sectionTitle}>Select Dates</Text>
               <View style={styles.dateSection}>
                 <View style={styles.dateRow}>
-                  <TouchableOpacity style={styles.dateBox} onPress={() => setShowCheckIn(true)}>
+                  <TouchableOpacity
+                    style={styles.dateBox}
+                    onPress={() => {
+                      if (!checkIn) setCheckIn(today);
+                      setShowCheckIn(true);
+                    }}
+                  >
                     <Text style={styles.dateLabel}>CHECK-IN</Text>
                     <Text style={checkIn ? styles.dateValue : styles.datePlaceholder}>
                       {checkIn ? fmtDate(checkIn) : 'Select date'}
                     </Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.dateBox} onPress={() => setShowCheckOut(true)}>
+                  <TouchableOpacity
+                    style={styles.dateBox}
+                    onPress={() => {
+                      if (!checkOut) {
+                        const base = checkIn || today;
+                        setCheckOut(new Date(base.getTime() + 86400000));
+                      }
+                      setShowCheckOut(true);
+                    }}
+                  >
                     <Text style={styles.dateLabel}>CHECK-OUT</Text>
                     <Text style={checkOut ? styles.dateValue : styles.datePlaceholder}>
                       {checkOut ? fmtDate(checkOut) : 'Select date'}
@@ -198,7 +208,15 @@ export default function RoomDetailScreen({ navigation, route }: Props) {
                   </View>
                 </View>
 
-                {checkIn && checkOut && nights > 0 && (
+                {/* Conflict warning */}
+                {isConflict && (
+                  <View style={styles.conflictWarning}>
+                    <Ionicons name="alert-circle" size={16} color={COLORS.red} />
+                    <Text style={styles.conflictText}>The selected dates are unavailable for this room.</Text>
+                  </View>
+                )}
+
+                {checkIn && checkOut && nights > 0 && !isConflict && (
                   <View style={styles.summary}>
                     <View style={styles.summaryRow}>
                       <Text style={styles.summaryLabel}>Duration</Text>
@@ -250,12 +268,12 @@ export default function RoomDetailScreen({ navigation, route }: Props) {
 
         {room.isAvailable && (
           <TouchableOpacity
-            style={[styles.button, (!checkIn || !checkOut || nights <= 0) && styles.buttonDisabled]}
+            style={[styles.button, (!checkIn || !checkOut || nights <= 0 || !!isConflict) && styles.buttonDisabled]}
             onPress={handleBook}
-            disabled={!checkIn || !checkOut || nights <= 0}
+            disabled={!checkIn || !checkOut || nights <= 0 || !!isConflict}
           >
             <Text style={styles.buttonText}>
-              {checkIn && checkOut && nights > 0 ? `Book for $${totalPrice}` : 'Select dates to book'}
+              {isConflict ? 'Dates Unavailable' : checkIn && checkOut && nights > 0 ? `Book for $${totalPrice}` : 'Select dates to book'}
             </Text>
           </TouchableOpacity>
         )}
@@ -264,10 +282,18 @@ export default function RoomDetailScreen({ navigation, route }: Props) {
       <Modal visible={showCheckIn} transparent animationType="slide">
         <TouchableOpacity style={pickerOverlay} activeOpacity={1} onPress={() => setShowCheckIn(false)}>
           <View style={pickerSheet}>
+            <View style={styles.pickerHeader}>
+              <Text style={styles.pickerTitle}>Select Check-in Date</Text>
+              <TouchableOpacity onPress={() => setShowCheckIn(false)}>
+                <Text style={styles.pickerDone}>Done</Text>
+              </TouchableOpacity>
+            </View>
             <DateTimePicker
               value={checkIn ?? today}
               mode="date"
               display={Platform.OS === 'ios' ? 'inline' : 'default'}
+              themeVariant="light"
+              accentColor={COLORS.gold}
               minimumDate={today}
               onChange={(_, date) => {
                 if (Platform.OS === 'android') setShowCheckIn(false);
@@ -281,10 +307,18 @@ export default function RoomDetailScreen({ navigation, route }: Props) {
       <Modal visible={showCheckOut} transparent animationType="slide">
         <TouchableOpacity style={pickerOverlay} activeOpacity={1} onPress={() => setShowCheckOut(false)}>
           <View style={pickerSheet}>
+            <View style={styles.pickerHeader}>
+              <Text style={styles.pickerTitle}>Select Check-out Date</Text>
+              <TouchableOpacity onPress={() => setShowCheckOut(false)}>
+                <Text style={styles.pickerDone}>Done</Text>
+              </TouchableOpacity>
+            </View>
             <DateTimePicker
               value={checkOut ?? (checkIn ? new Date(checkIn.getTime() + 86400000) : today)}
               mode="date"
               display={Platform.OS === 'ios' ? 'inline' : 'default'}
+              themeVariant="light"
+              accentColor={COLORS.gold}
               minimumDate={checkIn ? new Date(checkIn.getTime() + 86400000) : new Date(today.getTime() + 86400000)}
               onChange={(_, date) => {
                 if (Platform.OS === 'android') setShowCheckOut(false);

@@ -54,4 +54,42 @@ export default StyleSheet.create({
   guestBtn: { width: 34, height: 34, borderRadius: 17, backgroundColor: COLORS.gray100, alignItems: 'center', justifyContent: 'center' },
   guestBtnDisabled: { backgroundColor: COLORS.gray100, opacity: 0.5 },
   guestCount: { fontSize: 18, fontWeight: 'bold', color: COLORS.navy, minWidth: 24, textAlign: 'center' },
+  // Picker Styles
+  pickerHeader: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.gray100,
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  pickerTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.navy,
+  },
+  pickerDone: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.gold,
+  },
+  conflictWarning: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: COLORS.redLight,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  conflictText: {
+    fontSize: 13,
+    color: COLORS.red,
+    fontWeight: '500',
+  },
 });
