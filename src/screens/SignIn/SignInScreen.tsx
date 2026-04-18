@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   ActivityIndicator, KeyboardAvoidingView, Platform,
   ScrollView, Text, TextInput, TouchableOpacity, View,
+  StatusBar
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -47,88 +48,119 @@ export default function SignInScreen({ navigation }: Props) {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={0}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-        bounces={false}
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <View style={styles.topSection}>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="chevron-back" size={18} color="rgba(255, 255, 255, 0.5)" />
+          <Text style={styles.backText}>Back</Text>
+        </TouchableOpacity>
+
+        <View style={styles.headerLogoRow}>
+          <View style={styles.logoBox}>
+            <Ionicons name="business" size={18} color={COLORS.white} />
+          </View>
+          <Text style={styles.logoText}>LuxeStay</Text>
+        </View>
+
+        <Text style={styles.welcomeTitle}>Welcome back</Text>
+        <Text style={styles.welcomeSubtitle}>Sign in to your account to continue</Text>
+      </View>
+
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={styles.top}>
-          <View style={styles.logoContainer}>
-            <Text style={styles.logoIcon}>✦</Text>
-          </View>
-          <Text style={styles.logo}>LUXESTAY</Text>
-          <Text style={styles.tagline}>Experience Luxury. Feel at Home.</Text>
-        </View>
-
-        <View style={styles.form}>
-          <Text style={styles.formTitle}>Welcome Back</Text>
-          <Text style={styles.formSubtitle}>Sign in to your account</Text>
-
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Email Address</Text>
-            <View style={[styles.inputWrap, errors.email ? styles.inputError : null]}>
-              <Ionicons name="mail-outline" size={18} color={COLORS.gray400} style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="you@email.com"
-                placeholderTextColor={COLORS.gray300}
-                value={email}
-                onChangeText={t => { setEmail(t); setErrors(p => ({ ...p, email: undefined })); }}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                returnKeyType="next"
-              />
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
+          <View style={styles.formSection}>
+            <View style={styles.fieldGroup}>
+              <Text style={styles.label}>Email Address</Text>
+              <View style={[styles.inputContainer, errors.email ? styles.inputError : null]}>
+                <Ionicons name="mail-outline" size={18} color="rgba(10, 30, 61, 0.4)" />
+                <TextInput
+                  style={styles.input}
+                  placeholder="you@example.com"
+                  placeholderTextColor="rgba(10, 30, 61, 0.3)"
+                  value={email}
+                  onChangeText={t => { setEmail(t); setErrors(p => ({ ...p, email: undefined })); }}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+              {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
             </View>
-            {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
-          </View>
 
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Password</Text>
-            <View style={[styles.inputWrap, errors.password ? styles.inputError : null]}>
-              <Ionicons name="lock-closed-outline" size={18} color={COLORS.gray400} style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="••••••••"
-                placeholderTextColor={COLORS.gray300}
-                value={password}
-                onChangeText={t => { setPassword(t); setErrors(p => ({ ...p, password: undefined })); }}
-                secureTextEntry={!showPassword}
-                returnKeyType="done"
-                onSubmitEditing={handleLogin}
-              />
-              <TouchableOpacity onPress={() => setShowPassword(p => !p)} style={styles.eyeBtn}>
-                <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={COLORS.gray400} />
-              </TouchableOpacity>
+            <View style={styles.fieldGroup}>
+              <View style={styles.labelRow}>
+                <Text style={styles.label}>Password</Text>
+                <TouchableOpacity onPress={() => showToast("Feature coming soon", "info")}>
+                  <Text style={styles.forgotText}>Forgot password?</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={[styles.inputContainer, errors.password ? styles.inputError : null]}>
+                <Ionicons name="lock-closed-outline" size={18} color="rgba(10, 30, 61, 0.4)" />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter your password"
+                  placeholderTextColor="rgba(10, 30, 61, 0.3)"
+                  value={password}
+                  onChangeText={t => { setPassword(t); setErrors(p => ({ ...p, password: undefined })); }}
+                  secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity onPress={() => setShowPassword(p => !p)} style={styles.eyeBtn}>
+                  <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color="rgba(10, 30, 61, 0.4)" />
+                </TouchableOpacity>
+              </View>
+              {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
             </View>
-            {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+
+            <TouchableOpacity 
+              style={[styles.signInButton, loading && { opacity: 0.7 }]} 
+              onPress={handleLogin} 
+              disabled={loading}
+            >
+              {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={styles.signInButtonText}>Sign In</Text>}
+            </TouchableOpacity>
+
+            <View style={styles.dividerRow}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <TouchableOpacity 
+              style={styles.createAccountContainer} 
+              onPress={() => navigation.navigate('Register')}
+            >
+              <Text style={styles.noAccountText}>Don't have an account?</Text>
+              <Text style={styles.createOneText}>Create one</Text>
+            </TouchableOpacity>
+
+            <View style={styles.footerFeatures}>
+              <View style={styles.featureItem}>
+                <Text style={styles.featureIcon}>🔒</Text>
+                <Text style={styles.featureLabel}>Secure login</Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Text style={styles.featureIcon}>🏨</Text>
+                <Text style={styles.featureLabel}>Verified hotels</Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Text style={styles.featureIcon}>✅</Text>
+                <Text style={styles.featureLabel}>Best price</Text>
+              </View>
+            </View>
           </View>
-
-          <View style={styles.hint}>
-            <Ionicons name="information-circle-outline" size={14} color={COLORS.goldDark} />
-            <Text style={styles.hintText}>  Demo: john@luxestay.com / password123</Text>
-          </View>
-
-          <TouchableOpacity style={[styles.button, loading && styles.buttonDisabled]} onPress={handleLogin} disabled={loading}>
-            {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={styles.buttonText}>Sign In</Text>}
-          </TouchableOpacity>
-
-          <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          <TouchableOpacity style={styles.outlineButton} onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.outlineButtonText}>Create an Account</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }

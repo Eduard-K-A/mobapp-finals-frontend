@@ -14,7 +14,7 @@ interface BookingContextType {
   reviews: Review[];
   addBooking: (booking: Booking) => void;
   cancelBooking: (bookingId: string) => void;
-  rescheduleBooking: (bookingId: string, checkInDate: string, checkOutDate: string) => void;
+  editBooking: (bookingId: string, checkInDate: string, checkOutDate: string, totalGuests: number, totalPrice: number) => void;
   getBookingById: (id: string) => Booking | undefined;
   addReview: (review: Review) => void;
   deleteReview: (reviewId: string) => void;
@@ -28,7 +28,7 @@ const BookingContext = createContext<BookingContextType>({
   addBooking: () => {},
   cancelBooking: () => {},
   approveBooking: () => {},
-  rescheduleBooking: () => {},
+  editBooking: () => {},
   getBookingById: () => undefined,
   addReview: () => {},
   deleteReview: () => {},
@@ -55,9 +55,9 @@ export const BookingProvider = ({ children }: { children: React.ReactNode }) => 
       prev.map(b => b.id === bookingId && b.status === 'Pending' ? { ...b, status: 'Confirmed' } : b)
     );
 
-  const rescheduleBooking = (bookingId: string, checkInDate: string, checkOutDate: string) =>
+  const editBooking = (bookingId: string, checkInDate: string, checkOutDate: string, totalGuests: number, totalPrice: number) =>
     setRawBookings(prev =>
-      prev.map(b => b.id === bookingId ? { ...b, checkInDate, checkOutDate } : b)
+      prev.map(b => b.id === bookingId ? { ...b, checkInDate, checkOutDate, totalGuests, totalPrice } : b)
     );
 
   const getBookingById = (id: string): Booking | undefined =>
@@ -94,7 +94,7 @@ export const BookingProvider = ({ children }: { children: React.ReactNode }) => 
         addBooking,
         cancelBooking,
         approveBooking,
-        rescheduleBooking,
+        editBooking,
         getBookingById,
         addReview,
         deleteReview,

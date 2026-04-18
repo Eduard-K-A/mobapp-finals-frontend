@@ -1,33 +1,193 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform, Dimensions } from 'react-native';
 import { COLORS } from '../../constants/colors';
 
+const { width } = Dimensions.get('window');
+
 export default StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.navy },
-  scroll: { flexGrow: 1 },
-  top: { alignItems: 'center', paddingTop: 72, paddingBottom: 32 },
-  logoContainer: { width: 56, height: 56, borderRadius: 16, backgroundColor: COLORS.gold, justifyContent: 'center', alignItems: 'center', marginBottom: 14 },
-  logoIcon: { fontSize: 24, color: COLORS.white },
-  logo: { fontSize: 28, fontWeight: 'bold', color: COLORS.white, letterSpacing: 4 },
-  tagline: { fontSize: 13, color: COLORS.gray400, marginTop: 6, letterSpacing: 0.5 },
-  form: { backgroundColor: COLORS.white, borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 28, paddingBottom: 48, flex: 1 },
-  formTitle: { fontSize: 24, fontWeight: 'bold', color: COLORS.navy, marginBottom: 4 },
-  formSubtitle: { fontSize: 14, color: COLORS.gray500, marginBottom: 24 },
-  fieldGroup: { marginBottom: 16 },
-  label: { fontSize: 13, fontWeight: '600', color: COLORS.gray700, marginBottom: 7 },
-  inputWrap: { flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, borderColor: COLORS.gray200, borderRadius: 12, backgroundColor: COLORS.gray100, paddingHorizontal: 12 },
-  inputError: { borderColor: COLORS.red },
-  inputIcon: { marginRight: 8 },
-  input: { flex: 1, paddingVertical: 13, fontSize: 14, color: COLORS.gray900 },
-  eyeBtn: { padding: 4 },
-  errorText: { fontSize: 12, color: COLORS.red, marginTop: 5, marginLeft: 2 },
-  hint: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.goldLight, borderRadius: 8, padding: 10, marginBottom: 20 },
-  hintText: { fontSize: 12, color: COLORS.goldDark },
-  button: { backgroundColor: COLORS.gold, padding: 15, borderRadius: 12, alignItems: 'center', marginBottom: 16, elevation: 2 },
-  buttonDisabled: { opacity: 0.7 },
-  buttonText: { color: COLORS.white, fontWeight: 'bold', fontSize: 16, letterSpacing: 0.5 },
-  dividerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: COLORS.gray200 },
-  dividerText: { fontSize: 13, color: COLORS.gray400, marginHorizontal: 12 },
-  outlineButton: { borderWidth: 1.5, borderColor: COLORS.navy, padding: 14, borderRadius: 12, alignItems: 'center' },
-  outlineButtonText: { color: COLORS.navy, fontWeight: 'bold', fontSize: 15 },
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F6F3', // Figma Container Background
+  },
+  scroll: {
+    flexGrow: 1,
+  },
+  topSection: {
+    backgroundColor: COLORS.navy,
+    height: 240,
+    paddingHorizontal: 20,
+    justifyContent: 'flex-end',
+    paddingBottom: 32,
+  },
+  backButton: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 60 : 40,
+    left: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  backText: {
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontSize: 14,
+  },
+  headerLogoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 24,
+  },
+  logoBox: {
+    width: 36,
+    height: 36,
+    backgroundColor: COLORS.gold,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  welcomeTitle: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: COLORS.white,
+    marginBottom: 8,
+  },
+  welcomeSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.5)',
+  },
+  formSection: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 32,
+    gap: 24,
+  },
+  fieldGroup: {
+    gap: 8,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  label: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.navy,
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+  },
+  forgotText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: COLORS.gold,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    borderWidth: 1.1,
+    borderColor: '#EAEAEA',
+    borderRadius: 16,
+    height: 52,
+    paddingHorizontal: 16,
+    gap: 12,
+    // Shadow for iOS
+    shadowColor: COLORS.navy,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    // Elevation for Android
+    elevation: 2,
+  },
+  inputError: {
+    borderColor: COLORS.red,
+  },
+  input: {
+    flex: 1,
+    fontSize: 14,
+    color: COLORS.navy,
+  },
+  eyeBtn: {
+    padding: 4,
+  },
+  errorText: {
+    fontSize: 12,
+    color: COLORS.red,
+    marginTop: 4,
+  },
+  signInButton: {
+    backgroundColor: COLORS.gold,
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 16,
+    shadowColor: COLORS.gold,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.33,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  signInButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginVertical: 8,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E8E4DF',
+  },
+  dividerText: {
+    fontSize: 12,
+    color: '#99A1AF',
+  },
+  createAccountContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(10, 30, 61, 0.03)',
+    borderWidth: 1.1,
+    borderColor: 'rgba(10, 30, 61, 0.07)',
+    borderRadius: 16,
+    height: 54,
+    gap: 6,
+  },
+  noAccountText: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  createOneText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.navy,
+  },
+  footerFeatures: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 24,
+    marginTop: 'auto',
+    paddingVertical: 32,
+  },
+  featureItem: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  featureIcon: {
+    fontSize: 18,
+  },
+  featureLabel: {
+    fontSize: 10,
+    color: '#99A1AF',
+  },
 });

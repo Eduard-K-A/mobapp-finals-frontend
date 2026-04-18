@@ -1,52 +1,230 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform, Dimensions } from 'react-native';
 import { COLORS } from '../../constants/colors';
 
+const { width } = Dimensions.get('window');
+
 export default StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.offWhite },
-  header: { backgroundColor: COLORS.navy, paddingHorizontal: 20, paddingTop: 56, paddingBottom: 16 },
-  title: { fontSize: 24, fontWeight: 'bold', color: COLORS.white },
-  subtitle: { fontSize: 13, color: COLORS.gray400, marginTop: 4 },
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F6F3',
+  },
+  header: {
+    backgroundColor: COLORS.navy,
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 60 : 50,
+    paddingBottom: 20,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.white,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#99A1AF',
+    marginTop: 4,
+  },
 
   // Tabs
-  tabsWrapper: { backgroundColor: COLORS.navy, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)' },
-  tabs: { paddingHorizontal: 16, paddingBottom: 12, gap: 8 },
-  tab: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.1)' },
-  tabActive: { backgroundColor: COLORS.gold },
-  tabText: { fontSize: 13, color: COLORS.gray400, fontWeight: '500' },
-  tabTextActive: { color: COLORS.white, fontWeight: 'bold' },
-  tabBadge: { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 10, paddingHorizontal: 6, paddingVertical: 1 },
-  tabBadgeActive: { backgroundColor: 'rgba(255,255,255,0.3)' },
-  tabBadgeText: { fontSize: 11, color: COLORS.gray400, fontWeight: 'bold' },
-  tabBadgeTextActive: { color: COLORS.white },
+  tabsWrapper: {
+    backgroundColor: COLORS.navy,
+    paddingBottom: 15,
+  },
+  tabsScroll: {
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  tab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    marginRight: 8,
+  },
+  tabActive: {
+    backgroundColor: COLORS.gold,
+  },
+  tabText: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.6)',
+    fontWeight: '500',
+  },
+  tabTextActive: {
+    color: COLORS.white,
+    fontWeight: '600',
+  },
+  tabBadge: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 6,
+  },
+  tabBadgeActive: {
+    backgroundColor: 'rgba(255,255,255,0.3)',
+  },
+  tabBadgeText: {
+    fontSize: 12,
+    color: COLORS.white,
+    fontWeight: '700',
+  },
 
-  list: { padding: 16 },
-  listEmpty: { flex: 1 },
+  list: {
+    padding: 20,
+    paddingBottom: 100,
+  },
+  listEmpty: {
+    flexGrow: 1,
+    justifyContent: 'center',
+  },
 
-  // Booking card
-  card: { backgroundColor: COLORS.white, borderRadius: 16, marginBottom: 14, overflow: 'hidden', elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 8 },
-  cardImage: { width: '100%', height: 130 },
-  cardBody: { padding: 14 },
-  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
-  roomName: { fontSize: 16, fontWeight: 'bold', color: COLORS.navy, flex: 1, marginRight: 10 },
-  dateRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 12 },
-  dateBlock: { flex: 1 },
-  dateLabel: { fontSize: 10, fontWeight: '700', color: COLORS.gray400, letterSpacing: 0.5, marginBottom: 3 },
-  dateValue: { fontSize: 13, fontWeight: '600', color: COLORS.navy },
-  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, borderTopColor: COLORS.gray100, paddingTop: 10 },
-  nights: { fontSize: 13, color: COLORS.gray500 },
-  price: { fontSize: 18, fontWeight: 'bold', color: COLORS.gold },
+  // Reservation Card
+  card: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    marginBottom: 20,
+    overflow: 'hidden',
+    shadowColor: COLORS.navy,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 16,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#F0EDE8',
+  },
+  cardHeader: {
+    height: 144,
+    position: 'relative',
+  },
+  cardImage: {
+    width: '100%',
+    height: '100%',
+  },
+  cardImageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+  },
+  cardHeaderContent: {
+    position: 'absolute',
+    bottom: 12,
+    left: 12,
+    right: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+  cardHeaderText: {
+    flex: 1,
+    marginRight: 10,
+  },
+  cardCategory: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.8)',
+    marginBottom: 2,
+  },
+  cardTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.white,
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  statusIcon: {
+    marginRight: 4,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#10B981',
+  },
+  
+  cardBody: {
+    padding: 16,
+  },
+  detailsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  detailItem: {
+    alignItems: 'center',
+  },
+  detailLabel: {
+    fontSize: 12,
+    color: '#99A1AF',
+    marginBottom: 4,
+  },
+  detailValue: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.navy,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#F0EDE8',
+    marginBottom: 12,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  priceContainer: {
+    flex: 1,
+  },
+  paidLabel: {
+    fontSize: 12,
+    color: '#99A1AF',
+    marginBottom: 2,
+  },
+  paidValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.gold,
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  actionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    height: 32,
+    borderRadius: 14,
+    backgroundColor: 'rgba(10,30,61,0.06)',
+  },
+  actionBtnCancel: {
+    backgroundColor: '#FEF2F2',
+  },
+  actionBtnIcon: {
+    marginRight: 4,
+  },
+  actionBtnText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.navy,
+  },
+  actionBtnTextCancel: {
+    color: '#DC2626',
+  },
 
-  // Skeleton card
-  skeletonCard: { backgroundColor: COLORS.white, borderRadius: 16, marginBottom: 14, overflow: 'hidden', elevation: 2 },
-
-  // Legacy badge styles (kept for safety — BookingStatusPill now used instead)
-  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  confirmed: { backgroundColor: COLORS.greenLight },
-  pending: { backgroundColor: COLORS.yellowLight },
-  cancelled: { backgroundColor: COLORS.redLight },
-  completed: { backgroundColor: '#eff6ff' },
-  confirmedText: { fontSize: 12, color: COLORS.green, fontWeight: 'bold' },
-  pendingText: { fontSize: 12, color: COLORS.yellow, fontWeight: 'bold' },
-  cancelledText: { fontSize: 12, color: COLORS.red, fontWeight: 'bold' },
-  completedText: { fontSize: 12, color: '#2563eb', fontWeight: 'bold' },
+  // Skeleton
+  skeletonCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    marginBottom: 20,
+    overflow: 'hidden',
+    height: 268,
+  },
 });

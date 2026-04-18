@@ -1,51 +1,125 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 import { COLORS } from '../../constants/colors';
 
+const { width } = Dimensions.get('window');
+
 export const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.offWhite, alignItems: 'center', justifyContent: 'center', padding: 24 },
-  iconCircle: {
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F6F3',
+  },
+  scrollContent: {
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 60,
+    paddingBottom: 40,
+  },
+  successIconContainer: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: COLORS.green + '20',
-    alignItems: 'center',
+    backgroundColor: 'rgba(212, 165, 116, 0.13)',
     justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: 20,
+    marginTop: 40,
   },
-  title: { fontSize: 26, fontWeight: 'bold', color: COLORS.navy, textAlign: 'center', marginBottom: 8 },
-  subtitle: { fontSize: 14, color: COLORS.gray500, textAlign: 'center', marginBottom: 32 },
-  card: {
+  iconCircle: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: COLORS.navy,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#6A7282',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  roomName: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.navy,
+    textAlign: 'center',
+    marginBottom: 32,
+  },
+  detailsCard: {
     backgroundColor: COLORS.white,
     borderRadius: 16,
-    padding: 20,
-    width: '100%',
-    marginBottom: 32,
-    elevation: 2,
-  },
-  cardTitle: { fontSize: 13, fontWeight: 'bold', color: COLORS.gray400, letterSpacing: 0.5, marginBottom: 14 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  rowLabel: { fontSize: 14, color: COLORS.gray500 },
-  rowValue: { fontSize: 14, fontWeight: '600', color: COLORS.navy },
-  divider: { height: 1, backgroundColor: COLORS.gray100, marginVertical: 10 },
-  totalLabel: { fontSize: 15, fontWeight: 'bold', color: COLORS.navy },
-  totalValue: { fontSize: 18, fontWeight: 'bold', color: COLORS.gold },
-  primaryBtn: {
-    backgroundColor: COLORS.gold,
-    borderRadius: 12,
     padding: 16,
-    alignItems: 'center',
     width: '100%',
+    shadowColor: COLORS.navy,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
+    marginBottom: 32,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 12,
   },
-  primaryBtnText: { color: COLORS.white, fontWeight: 'bold', fontSize: 16 },
-  secondaryBtn: {
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    padding: 15,
+  detailLabel: {
+    fontSize: 14,
+    color: '#6A7282',
+  },
+  detailValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.navy,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#F0EDE8',
+    marginVertical: 12,
+  },
+  totalLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.navy,
+  },
+  totalValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.gold,
+  },
+  buttonContainer: {
+    width: '100%',
+    gap: 12,
+  },
+  primaryBtn: {
+    backgroundColor: COLORS.gold,
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
-    borderWidth: 1.5,
-    borderColor: COLORS.gray200,
   },
-  secondaryBtnText: { color: COLORS.navy, fontWeight: '600', fontSize: 15 },
+  primaryBtnText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  secondaryBtn: {
+    backgroundColor: '#F3F4F6',
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  secondaryBtnText: {
+    color: COLORS.navy,
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });

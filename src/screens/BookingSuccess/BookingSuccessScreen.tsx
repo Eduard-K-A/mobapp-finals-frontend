@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View, ScrollView, SafeAreaView } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,7 +14,7 @@ type Props = {
 };
 
 const fmt = (d: string) =>
-  new Date(d).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+  new Date(d).toLocaleDateString('en-CA'); // YYYY-MM-DD as seen in Figma
 
 export default function BookingSuccessScreen({ navigation, route }: Props) {
   const { bookingId } = route.params;
@@ -37,54 +37,50 @@ export default function BookingSuccessScreen({ navigation, route }: Props) {
       routes: [{ name: 'MainTabs', params: { screen: 'MyBookings' } }],
     });
 
+  if (!booking) return null;
+
   return (
-    <View style={styles.container}>
-      <View style={styles.iconCircle}>
-        <Ionicons name="checkmark" size={40} color={COLORS.green} />
-      </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.successIconContainer}>
+          <View style={styles.iconCircle}>
+            <Ionicons name="checkmark" size={40} color={COLORS.gold} />
+          </View>
+        </View>
 
-      <Text style={styles.title}>Booking Confirmed!</Text>
-      <Text style={styles.subtitle}>Your reservation has been placed successfully.</Text>
+        <Text style={styles.title}>Booking Confirmed!</Text>
+        <Text style={styles.subtitle}>Your reservation at</Text>
+        <Text style={styles.roomName}>{booking.room.title}</Text>
 
-      {booking && (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>BOOKING SUMMARY</Text>
-          <View style={styles.row}>
-            <Text style={styles.rowLabel}>Room</Text>
-            <Text style={[styles.rowValue, { flex: 1, textAlign: 'right' }]} numberOfLines={1}>
-              {booking.room.title}
-            </Text>
+        <View style={styles.detailsCard}>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Check-in</Text>
+            <Text style={styles.detailValue}>{fmt(booking.checkInDate)}</Text>
           </View>
-          <View style={styles.row}>
-            <Text style={styles.rowLabel}>Check-in</Text>
-            <Text style={styles.rowValue}>{fmt(booking.checkInDate)}</Text>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Check-out</Text>
+            <Text style={styles.detailValue}>{fmt(booking.checkOutDate)}</Text>
           </View>
-          <View style={styles.row}>
-            <Text style={styles.rowLabel}>Check-out</Text>
-            <Text style={styles.rowValue}>{fmt(booking.checkOutDate)}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.rowLabel}>Duration</Text>
-            <Text style={styles.rowValue}>{nights} night{nights !== 1 ? 's' : ''}</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.rowLabel}>Guests</Text>
-            <Text style={styles.rowValue}>{booking.totalGuests}</Text>
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Nights</Text>
+            <Text style={styles.detailValue}>{nights}</Text>
           </View>
           <View style={styles.divider} />
-          <View style={styles.row}>
-            <Text style={styles.totalLabel}>Total</Text>
+          <View style={styles.detailRow}>
+            <Text style={styles.totalLabel}>Total Paid</Text>
             <Text style={styles.totalValue}>${booking.totalPrice}</Text>
           </View>
         </View>
-      )}
 
-      <TouchableOpacity style={styles.primaryBtn} onPress={goBookings}>
-        <Text style={styles.primaryBtnText}>View My Bookings</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.secondaryBtn} onPress={goHome}>
-        <Text style={styles.secondaryBtnText}>Back to Home</Text>
-      </TouchableOpacity>
-    </View>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.primaryBtn} onPress={goBookings}>
+            <Text style={styles.primaryBtnText}>View My Reservations</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.secondaryBtn} onPress={goHome}>
+            <Text style={styles.secondaryBtnText}>Browse More Rooms</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

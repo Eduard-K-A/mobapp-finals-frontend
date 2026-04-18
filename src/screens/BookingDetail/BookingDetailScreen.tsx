@@ -30,17 +30,18 @@ const fmtShort = (d: Date) =>
   d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
 
 export default function BookingDetailScreen({ navigation, route }: Props) {
-  const { bookingId } = route.params;
-  const { bookings, cancelBooking, rescheduleBooking, isRoomBooked, reviews, addReview } = useBookings();
+  const { bookingId, action } = route.params;
+  const { bookings, cancelBooking, editBooking, isRoomBooked, reviews, addReview } = useBookings();
   const { showToast } = useToast();
   const { user } = useAuth();
 
   const [cancelModal, setCancelModal] = useState(false);
 
-  // Reschedule state
-  const [rescheduleModal, setRescheduleModal] = useState(false);
+  // Edit state
+  const [editModal, setEditModal] = useState(false);
   const [newCheckIn, setNewCheckIn] = useState<Date | null>(null);
   const [newCheckOut, setNewCheckOut] = useState<Date | null>(null);
+  const [newGuests, setNewGuests] = useState<number>(1);
   const [showPickerIn, setShowPickerIn] = useState(false);
   const [showPickerOut, setShowPickerOut] = useState(false);
 
@@ -52,12 +53,32 @@ export default function BookingDetailScreen({ navigation, route }: Props) {
   const [textErr, setTextErr] = useState('');
 
   const booking = bookings.find(b => b.id === bookingId);
+
+  React.useEffect(() => {
+    if (action === 'edit' && booking) {
+      setNewCheckIn(new Date(booking.checkInDate));
+      setNewCheckOut(new Date(booking.checkOutDate));
+      setNewGuests(booking.totalGuests);
+      setEditModal(true);
+    }
+    if (action === 'cancel') setCancelModal(true);
+  }, [action, booking]);
+
   if (!booking) return null;
 
-  const nights = Math.round(
+  const originalNights = Math.round(
     (new Date(booking.checkOutDate).getTime() - new Date(booking.checkInDate).getTime()) /
       (1000 * 60 * 60 * 24),
   );
+  
+  // Computed values for Edit Preview
+  const newNights = newCheckIn && newCheckOut 
+    ? Math.round((newCheckOut.getTime() - newCheckIn.getTime()) / (1000 * 60 * 60 * 24))
+    : originalNights;
+  
+  const newTotalPrice = newNights * booking.room.pricePerNight;
+  const priceDiff = newTotalPrice - booking.totalPrice;
+
   const cancellationFee = Math.round(booking.totalPrice * CANCELLATION_FEE_PERCENT);
   const refundAmount = booking.totalPrice - cancellationFee;
 
@@ -70,24 +91,37 @@ export default function BookingDetailScreen({ navigation, route }: Props) {
     navigation.goBack();
   };
 
-  // ── Reschedule ───────────────────────────────────────────────────────────────
+  // ── Edit Booking ─────────────────────────────────────────────────────────────
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const handleReschedule = () => {
+  const handleEditBooking = () => {
     if (!newCheckIn || !newCheckOut) {
-      showToast('Please select new dates.', 'error');
+      showToast('Please select dates.', 'error');
       return;
     }
+
+    const isSameDateIn = newCheckIn.toISOString() === new Date(booking.checkInDate).toISOString();
+    const isSameDateOut = newCheckOut.toISOString() === new Date(booking.checkOutDate).toISOString();
+    const isSameGuests = newGuests === booking.totalGuests;
+
+    if (isSameDateIn && isSameDateOut && isSameGuests) {
+      showToast('No changes made.', 'info');
+      setEditModal(false);
+      return;
+    }
+
     const inStr = newCheckIn.toISOString();
     const outStr = newCheckOut.toISOString();
+    
     if (isRoomBooked(booking.room.id, inStr, outStr, bookingId)) {
-      showToast(VALIDATION.DOUBLE_BOOKING, 'error');
+      showToast('These dates are no longer available. Please choose others.', 'error');
       return;
     }
-    rescheduleBooking(bookingId, inStr, outStr);
-    setRescheduleModal(false);
-    showToast(VALIDATION.BOOKING_RESCHEDULED, 'success');
+
+    editBooking(bookingId, inStr, outStr, newGuests, newTotalPrice);
+    setEditModal(false);
+    showToast('Booking updated successfully!', 'success');
   };
 
   // ── Review ───────────────────────────────────────────────────────────────────
@@ -133,7 +167,10 @@ export default function BookingDetailScreen({ navigation, route }: Props) {
           <Text style={styles.headerTitle}>Booking Details</Text>
         </View>
 
-        <Image source={{ uri: booking.room.thumbnailPic?.url }} style={styles.image} />
+        <Image 
+          source={{ uri: booking.room.photos?.[0]?.url || booking.room.thumbnailPic?.url }} 
+          style={styles.image} 
+        />
 
         <View style={styles.body}>
           <View style={styles.statusRow}>
@@ -155,18 +192,18 @@ export default function BookingDetailScreen({ navigation, route }: Props) {
             </View>
             <View style={styles.row}>
               <Text style={styles.rowLabel}>Duration</Text>
-              <Text style={styles.rowValue}>{nights} night{nights > 1 ? 's' : ''}</Text>
+              <Text style={styles.rowValue}>{originalNights} night{originalNights > 1 ? 's' : ''}</Text>
             </View>
             <View style={styles.row}>
               <Text style={styles.rowLabel}>Guests</Text>
-              <Text style={styles.rowValue}>{booking.totalGuests}</Text>
+              <Text style={styles.rowValue}>{booking.totalGuests} Guests</Text>
             </View>
           </View>
 
           <View style={styles.card}>
             <Text style={styles.cardTitle}>PRICE BREAKDOWN</Text>
             <View style={styles.row}>
-              <Text style={styles.rowLabel}>${booking.room.pricePerNight} × {nights} night{nights > 1 ? 's' : ''}</Text>
+              <Text style={styles.rowLabel}>${booking.room.pricePerNight} × {originalNights} night{originalNights > 1 ? 's' : ''}</Text>
               <Text style={styles.rowValue}>${booking.totalPrice}</Text>
             </View>
             {booking.status === 'Cancelled' && (
@@ -228,8 +265,16 @@ export default function BookingDetailScreen({ navigation, route }: Props) {
         )}
 
         {booking.status === 'Confirmed' && (
-          <TouchableOpacity style={styles.rescheduleBtn} onPress={() => setRescheduleModal(true)}>
-            <Text style={styles.rescheduleBtnText}>Reschedule</Text>
+          <TouchableOpacity 
+            style={styles.rescheduleBtn} 
+            onPress={() => {
+              setNewCheckIn(new Date(booking.checkInDate));
+              setNewCheckOut(new Date(booking.checkOutDate));
+              setNewGuests(booking.totalGuests);
+              setEditModal(true);
+            }}
+          >
+            <Text style={styles.rescheduleBtnText}>Edit Booking</Text>
           </TouchableOpacity>
         )}
 
@@ -253,101 +298,184 @@ export default function BookingDetailScreen({ navigation, route }: Props) {
         onCancel={() => setCancelModal(false)}
       />
 
-      {/* Reschedule Modal */}
-      <Modal visible={rescheduleModal} transparent animationType="slide" statusBarTranslucent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalSheet}>
-            <Text style={styles.modalTitle}>Reschedule Booking</Text>
+      {/* Edit Booking Modal */}
+      <Modal visible={editModal} transparent animationType="slide" statusBarTranslucent>
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setEditModal(false)}
+        >
+          <TouchableOpacity
+            style={styles.modalSheet}
+            activeOpacity={1}
+            onPress={e => e.stopPropagation()}
+          >
+            <Text style={styles.modalTitle}>Edit Your Booking</Text>
 
-            <Text style={styles.modalLabel}>New Check-in</Text>
-            <TouchableOpacity
-              style={styles.dateBox2}
-              onPress={() => {
-                if (!newCheckIn) setNewCheckIn(today);
-                setShowPickerIn(true);
-              }}
-            >
-              <Text style={styles.dateLabel2}>CHECK-IN</Text>
-              <Text style={newCheckIn ? styles.dateValue2 : styles.datePlaceholder2}>
-                {newCheckIn ? fmtShort(newCheckIn) : 'Select date'}
-              </Text>
+            <View style={styles.dateRow2}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.modalLabel}>CHECK-IN</Text>
+                <TouchableOpacity
+                  style={styles.dateBox2}
+                  onPress={() => setShowPickerIn(true)}
+                >
+                  <Text style={newCheckIn ? styles.dateValue2 : styles.datePlaceholder2}>
+                    {newCheckIn ? fmtShort(newCheckIn) : 'Select date'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.modalLabel}>CHECK-OUT</Text>
+                <TouchableOpacity
+                  style={styles.dateBox2}
+                  onPress={() => setShowPickerOut(true)}
+                >
+                  <Text style={newCheckOut ? styles.dateValue2 : styles.datePlaceholder2}>
+                    {newCheckOut ? fmtShort(newCheckOut) : 'Select date'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={{ marginTop: 16 }}>
+              <Text style={styles.modalLabel}>NUMBER OF GUESTS</Text>
+              <View style={styles.guestSelector}>
+                <TouchableOpacity
+                  style={styles.guestBtn}
+                  onPress={() => setNewGuests(Math.max(1, newGuests - 1))}
+                >
+                  <Ionicons name="remove" size={20} color={COLORS.navy} />
+                </TouchableOpacity>
+                <Text style={styles.guestCountText}>{newGuests} Guest{newGuests > 1 ? 's' : ''}</Text>
+                <TouchableOpacity
+                  style={styles.guestBtn}
+                  onPress={() => setNewGuests(Math.min(booking.room.maxPeople, newGuests + 1))}
+                >
+                  <Ionicons name="add" size={20} color={COLORS.navy} />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.capacityText}>Maximum capacity: {booking.room.maxPeople} guests</Text>
+            </View>
+
+            <View style={styles.previewCard}>
+              <View style={styles.previewRow}>
+                <Text style={styles.previewLabel}>Duration Change</Text>
+                <Text style={styles.previewValue}>
+                  {originalNights} → {newNights} night{newNights > 1 ? 's' : ''}
+                </Text>
+              </View>
+              <View style={styles.divider} />
+              <View style={styles.previewRow}>
+                <Text style={styles.previewLabel}>Price Difference</Text>
+                <Text style={[
+                  styles.previewValue,
+                  { color: priceDiff > 0 ? COLORS.red : priceDiff < 0 ? COLORS.green : COLORS.navy }
+                ]}>
+                  {priceDiff > 0 ? `+$${priceDiff}` : priceDiff < 0 ? `-$${Math.abs(priceDiff)}` : 'No change'}
+                </Text>
+              </View>
+              <View style={styles.previewRow}>
+                <Text style={styles.previewTotalLabel}>New Total</Text>
+                <Text style={styles.previewTotalValue}>${newTotalPrice}</Text>
+              </View>
+            </View>
+
+            <TouchableOpacity style={styles.modalSaveBtn} onPress={handleEditBooking}>
+              <Text style={styles.modalSaveBtnText}>Confirm Changes</Text>
             </TouchableOpacity>
-
-            <Text style={[styles.modalLabel, { marginTop: 12 }]}>New Check-out</Text>
             <TouchableOpacity
-              style={styles.dateBox2}
-              onPress={() => {
-                if (!newCheckOut) {
-                  const base = newCheckIn || today;
-                  setNewCheckOut(new Date(base.getTime() + 86400000));
+              style={styles.modalCancelBtn}
+              onPress={() => setEditModal(false)}
+            >
+              <Text style={styles.modalCancelBtnText}>Dismiss</Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Date Pickers */}
+      {showPickerIn && (
+        Platform.OS === 'ios' ? (
+          <Modal visible={showPickerIn} transparent animationType="slide">
+            <TouchableOpacity style={pickerOverlay} activeOpacity={1} onPress={() => setShowPickerIn(false)}>
+              <View style={pickerSheet}>
+                <View style={styles.pickerHeader}>
+                  <Text style={styles.pickerTitle}>Check-in Date</Text>
+                  <TouchableOpacity onPress={() => setShowPickerIn(false)}>
+                    <Text style={styles.pickerDone}>Done</Text>
+                  </TouchableOpacity>
+                </View>
+                <DateTimePicker
+                  value={newCheckIn ?? today}
+                  mode="date"
+                  display="inline"
+                  themeVariant="light"
+                  accentColor={COLORS.gold}
+                  minimumDate={today}
+                  onChange={(_, date) => {
+                    if (date) { 
+                      setNewCheckIn(date); 
+                      if (newCheckOut && newCheckOut <= date) {
+                        setNewCheckOut(new Date(date.getTime() + 86400000));
+                      }
+                    }
+                  }}
+                />
+              </View>
+            </TouchableOpacity>
+          </Modal>
+        ) : (
+          <DateTimePicker
+            value={newCheckIn ?? today}
+            mode="date"
+            display="default"
+            minimumDate={today}
+            onChange={(_, date) => { 
+              setShowPickerIn(false); 
+              if (date) {
+                setNewCheckIn(date);
+                if (newCheckOut && newCheckOut <= date) {
+                  setNewCheckOut(new Date(date.getTime() + 86400000));
                 }
-                setShowPickerOut(true);
-              }}
-            >
-              <Text style={styles.dateLabel2}>CHECK-OUT</Text>
-              <Text style={newCheckOut ? styles.dateValue2 : styles.datePlaceholder2}>
-                {newCheckOut ? fmtShort(newCheckOut) : 'Select date'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalSaveBtn} onPress={handleReschedule}>
-              <Text style={styles.modalSaveBtnText}>Confirm Reschedule</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.modalCancelBtn} onPress={() => setRescheduleModal(false)}>
-              <Text style={styles.modalCancelBtnText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+              }
+            }}
+          />
+        )
+      )}
 
-      <Modal visible={showPickerIn} transparent animationType="slide">
-        <TouchableOpacity style={pickerOverlay} activeOpacity={1} onPress={() => setShowPickerIn(false)}>
-          <View style={pickerSheet}>
-            <View style={styles.pickerHeader}>
-              <Text style={styles.pickerTitle}>Select Check-in Date</Text>
-              <TouchableOpacity onPress={() => setShowPickerIn(false)}>
-                <Text style={styles.pickerDone}>Done</Text>
-              </TouchableOpacity>
-            </View>
-            <DateTimePicker
-              value={newCheckIn ?? today}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'inline' : 'default'}
-              themeVariant="light"
-              accentColor={COLORS.gold}
-              minimumDate={today}
-              onChange={(_, date) => {
-                if (Platform.OS === 'android') setShowPickerIn(false);
-                if (date) { setNewCheckIn(date); if (newCheckOut && newCheckOut <= date) setNewCheckOut(null); }
-              }}
-            />
-          </View>
-        </TouchableOpacity>
-      </Modal>
-
-      <Modal visible={showPickerOut} transparent animationType="slide">
-        <TouchableOpacity style={pickerOverlay} activeOpacity={1} onPress={() => setShowPickerOut(false)}>
-          <View style={pickerSheet}>
-            <View style={styles.pickerHeader}>
-              <Text style={styles.pickerTitle}>Select Check-out Date</Text>
-              <TouchableOpacity onPress={() => setShowPickerOut(false)}>
-                <Text style={styles.pickerDone}>Done</Text>
-              </TouchableOpacity>
-            </View>
-            <DateTimePicker
-              value={newCheckOut ?? (newCheckIn ? new Date(newCheckIn.getTime() + 86400000) : today)}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'inline' : 'default'}
-              themeVariant="light"
-              accentColor={COLORS.gold}
-              minimumDate={newCheckIn ? new Date(newCheckIn.getTime() + 86400000) : new Date(today.getTime() + 86400000)}
-              onChange={(_, date) => {
-                if (Platform.OS === 'android') setShowPickerOut(false);
-                if (date) setNewCheckOut(date);
-              }}
-            />
-          </View>
-        </TouchableOpacity>
-      </Modal>
+      {showPickerOut && (
+        Platform.OS === 'ios' ? (
+          <Modal visible={showPickerOut} transparent animationType="slide">
+            <TouchableOpacity style={pickerOverlay} activeOpacity={1} onPress={() => setShowPickerOut(false)}>
+              <View style={pickerSheet}>
+                <View style={styles.pickerHeader}>
+                  <Text style={styles.pickerTitle}>Check-out Date</Text>
+                  <TouchableOpacity onPress={() => setShowPickerOut(false)}>
+                    <Text style={styles.pickerDone}>Done</Text>
+                  </TouchableOpacity>
+                </View>
+                <DateTimePicker
+                  value={newCheckOut ?? (newCheckIn ? new Date(newCheckIn.getTime() + 86400000) : today)}
+                  mode="date"
+                  display="inline"
+                  themeVariant="light"
+                  accentColor={COLORS.gold}
+                  minimumDate={newCheckIn ? new Date(newCheckIn.getTime() + 86400000) : new Date(today.getTime() + 86400000)}
+                  onChange={(_, date) => date && setNewCheckOut(date)}
+                />
+              </View>
+            </TouchableOpacity>
+          </Modal>
+        ) : (
+          <DateTimePicker
+            value={newCheckOut ?? (newCheckIn ? new Date(newCheckIn.getTime() + 86400000) : today)}
+            mode="date"
+            display="default"
+            minimumDate={newCheckIn ? new Date(newCheckIn.getTime() + 86400000) : new Date(today.getTime() + 86400000)}
+            onChange={(_, date) => { setShowPickerOut(false); if (date) setNewCheckOut(date); }}
+          />
+        )
+      )}
 
       {/* Review Modal */}
       <Modal visible={reviewModal} transparent animationType="slide" statusBarTranslucent>

@@ -51,12 +51,45 @@ export interface Booking {
 }
 
 export type RootStackParamList = {
+  Landing: undefined;
   SignIn: undefined;
   Register: undefined;
   MainTabs: undefined;
   AdminTabs: undefined;
   RoomDetail: { roomId: string };
-  BookingDetail: { bookingId: string };
+  BookingStep1: { roomId: string };
+  BookingStep2: {
+    room: {
+      id: string;
+      name: string;
+      image: string;
+      price: number;
+      category?: string;
+      floor?: string | number;
+      bedType?: string;
+    };
+    checkIn: string;
+    checkOut: string;
+    guests: number;
+    totalPrice: number;
+  };
+  Payment: {
+    room: {
+      id: string;
+      name: string;
+      image: string;
+      price: number;
+      category?: string;
+      floor?: string | number;
+      bedType?: string;
+    };
+    checkIn: string;
+    checkOut: string;
+    guests: number;
+    totalPrice: number;
+    specialRequests?: string;
+  };
+  BookingDetail: { bookingId: string; action?: 'edit' | 'cancel' };
   BookingSuccess: { bookingId: string };
   EditProfile: undefined;
   AboutUs: undefined;
