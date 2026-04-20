@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   ActivityIndicator, KeyboardAvoidingView, Platform,
   ScrollView, Text, TextInput, TouchableOpacity, View,
@@ -21,6 +21,9 @@ export default function SignInScreen({ navigation }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  
+  const passwordRef = useRef<TextInput>(null);
+
   const { login } = useAuth();
   const { showToast } = useToast();
 
@@ -93,6 +96,8 @@ export default function SignInScreen({ navigation }: Props) {
                   onChangeText={t => { setEmail(t); setErrors(p => ({ ...p, email: undefined })); }}
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  returnKeyType="next"
+                  onSubmitEditing={() => passwordRef.current?.focus()}
                 />
               </View>
               {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
@@ -108,12 +113,15 @@ export default function SignInScreen({ navigation }: Props) {
               <View style={[styles.inputContainer, errors.password ? styles.inputError : null]}>
                 <Ionicons name="lock-closed-outline" size={18} color="rgba(10, 30, 61, 0.4)" />
                 <TextInput
+                  ref={passwordRef}
                   style={styles.input}
                   placeholder="Enter your password"
                   placeholderTextColor="rgba(10, 30, 61, 0.3)"
                   value={password}
                   onChangeText={t => { setPassword(t); setErrors(p => ({ ...p, password: undefined })); }}
                   secureTextEntry={!showPassword}
+                  returnKeyType="done"
+                  onSubmitEditing={handleLogin}
                 />
                 <TouchableOpacity onPress={() => setShowPassword(p => !p)} style={styles.eyeBtn}>
                   <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color="rgba(10, 30, 61, 0.4)" />
