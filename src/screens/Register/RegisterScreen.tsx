@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   ActivityIndicator, KeyboardAvoidingView, Platform,
   ScrollView, Text, TextInput, TouchableOpacity, View,
@@ -35,6 +35,12 @@ export default function RegisterScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   
+  const lastNameRef = useRef<TextInput>(null);
+  const emailRef = useRef<TextInput>(null);
+  const phoneRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInput>(null);
+  const confirmPasswordRef = useRef<TextInput>(null);
+
   const { showToast } = useToast();
 
   const validate = () => {
@@ -135,6 +141,8 @@ export default function RegisterScreen({ navigation }: Props) {
                     value={firstName}
                     onChangeText={t => { setFirstName(t); setErrors(p => ({ ...p, firstName: undefined })); }}
                     autoCapitalize="words"
+                    returnKeyType="next"
+                    onSubmitEditing={() => lastNameRef.current?.focus()}
                   />
                 </View>
                 {errors.firstName && <Text style={styles.errorText}>{errors.firstName}</Text>}
@@ -145,12 +153,15 @@ export default function RegisterScreen({ navigation }: Props) {
                 <View style={[styles.inputContainer, errors.lastName ? styles.inputError : null]}>
                   <Ionicons name="person-outline" size={18} color="rgba(10, 30, 61, 0.4)" />
                   <TextInput
+                    ref={lastNameRef}
                     style={styles.input}
                     placeholder="Doe"
                     placeholderTextColor="rgba(10, 30, 61, 0.3)"
                     value={lastName}
                     onChangeText={t => { setLastName(t); setErrors(p => ({ ...p, lastName: undefined })); }}
                     autoCapitalize="words"
+                    returnKeyType="next"
+                    onSubmitEditing={() => emailRef.current?.focus()}
                   />
                 </View>
                 {errors.lastName && <Text style={styles.errorText}>{errors.lastName}</Text>}
@@ -162,6 +173,7 @@ export default function RegisterScreen({ navigation }: Props) {
               <View style={[styles.inputContainer, errors.email ? styles.inputError : null]}>
                 <Ionicons name="mail-outline" size={18} color="rgba(10, 30, 61, 0.4)" />
                 <TextInput
+                  ref={emailRef}
                   style={styles.input}
                   placeholder="you@example.com"
                   placeholderTextColor="rgba(10, 30, 61, 0.3)"
@@ -169,6 +181,8 @@ export default function RegisterScreen({ navigation }: Props) {
                   onChangeText={t => { setEmail(t); setErrors(p => ({ ...p, email: undefined })); }}
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  returnKeyType="next"
+                  onSubmitEditing={() => phoneRef.current?.focus()}
                 />
               </View>
               {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
@@ -182,6 +196,7 @@ export default function RegisterScreen({ navigation }: Props) {
               <View style={[styles.inputContainer, errors.phone ? styles.inputError : null]}>
                 <Ionicons name="call-outline" size={18} color="rgba(10, 30, 61, 0.4)" />
                 <TextInput
+                  ref={phoneRef}
                   style={styles.input}
                   placeholder="09XXXXXXXXX"
                   placeholderTextColor="rgba(10, 30, 61, 0.3)"
@@ -189,6 +204,8 @@ export default function RegisterScreen({ navigation }: Props) {
                   onChangeText={t => { setPhone(t); setErrors(p => ({ ...p, phone: undefined })); }}
                   keyboardType="phone-pad"
                   maxLength={11}
+                  returnKeyType="next"
+                  onSubmitEditing={() => passwordRef.current?.focus()}
                 />
               </View>
               {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
@@ -199,12 +216,15 @@ export default function RegisterScreen({ navigation }: Props) {
               <View style={[styles.inputContainer, errors.password ? styles.inputError : null]}>
                 <Ionicons name="lock-closed-outline" size={18} color="rgba(10, 30, 61, 0.4)" />
                 <TextInput
+                  ref={passwordRef}
                   style={styles.input}
                   placeholder="At least 8 characters"
                   placeholderTextColor="rgba(10, 30, 61, 0.3)"
                   value={password}
                   onChangeText={t => { setPassword(t); setErrors(p => ({ ...p, password: undefined })); }}
                   secureTextEntry={!showPassword}
+                  returnKeyType="next"
+                  onSubmitEditing={() => confirmPasswordRef.current?.focus()}
                 />
                 <TouchableOpacity onPress={() => setShowPassword(p => !p)} style={styles.eyeBtn}>
                   <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color="rgba(10, 30, 61, 0.4)" />
@@ -218,12 +238,15 @@ export default function RegisterScreen({ navigation }: Props) {
               <View style={[styles.inputContainer, errors.confirmPassword ? styles.inputError : null]}>
                 <Ionicons name="lock-closed-outline" size={18} color="rgba(10, 30, 61, 0.4)" />
                 <TextInput
+                  ref={confirmPasswordRef}
                   style={styles.input}
                   placeholder="Repeat your password"
                   placeholderTextColor="rgba(10, 30, 61, 0.3)"
                   value={confirmPassword}
                   onChangeText={t => { setConfirmPassword(t); setErrors(p => ({ ...p, confirmPassword: undefined })); }}
                   secureTextEntry={!showPassword}
+                  returnKeyType="done"
+                  onSubmitEditing={handleRegister}
                 />
               </View>
               {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
