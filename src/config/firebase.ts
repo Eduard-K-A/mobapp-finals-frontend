@@ -1,15 +1,23 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth, connectAuthEmulator } from 'firebase/auth';
+import { 
+  getAuth, 
+  Auth, 
+  connectAuthEmulator, 
+  initializeAuth, 
+  getReactNativePersistence 
+} from 'firebase/auth';
 import { 
   getFirestore, 
   Firestore, 
   initializeFirestore, 
   persistentLocalCache,
-  connectFirestoreEmulator
+  connectFirestoreEmulator,
+  memoryLocalCache
 } from 'firebase/firestore';
 import { Platform } from 'react-native';
 import { getStorage, FirebaseStorage, connectStorageEmulator } from 'firebase/storage';
 import { getMessaging, Messaging } from 'firebase/messaging';
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import {
   FIREBASE_API_KEY,
   FIREBASE_AUTH_DOMAIN,
@@ -45,33 +53,27 @@ let messaging: Messaging | null = null;
 
 if (getApps().length === 0) {
   app = initializeApp(firebaseConfig);
-  // Enable persistent local cache for offline support
+  
+  // 1. Initialize Auth with Persistence for React Native
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(ReactNativeAsyncStorage)
+  });
+
+  // 2. Initialize Firestore with platform-specific cache
   db = initializeFirestore(app, {
-    localCache: persistentLocalCache({})
+    localCache: Platform.OS === 'web' 
+      ? persistentLocalCache({}) 
+      : memoryLocalCache()
   });
 } else {
   app = getApps()[0];
+  auth = getAuth(app);
   db = getFirestore(app);
 }
 
-auth = getAuth(app);
 storage = getStorage(app);
 
-// Connect to emulators in development mode
-if (__DEV__) {
-  try {
-    const host = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
-    
-    connectAuthEmulator(auth, `http://${host}:9099`);
-    connectFirestoreEmulator(db, host, 8080);
-    connectStorageEmulator(storage, host, 9199);
-    
-    console.log('[Firebase] Connected to emulators');
-  } catch (error) {
-    console.warn('[Firebase] Failed to connect to emulators:', error);
-  }
-}
-
+// Messaging is typically web/native specific
 if (Platform.OS === 'web') {
   try {
     messaging = getMessaging(app);
