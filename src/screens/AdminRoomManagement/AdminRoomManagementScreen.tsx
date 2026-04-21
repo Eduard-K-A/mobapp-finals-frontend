@@ -231,7 +231,7 @@ export default function AdminRoomManagementScreen() {
             />
             <View style={styles.cardContent}>
               <View style={styles.cardHeader}>
-                <View>
+                <View style={{ flex: 1, minWidth: 0 }}>
                   <View style={styles.typeTag}>
                     <Text style={styles.typeTagText}>{item.type}</Text>
                   </View>

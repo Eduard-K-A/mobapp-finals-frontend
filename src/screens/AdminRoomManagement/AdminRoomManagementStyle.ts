@@ -102,6 +102,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    flex: 1,
   },
   typeTag: {
     backgroundColor: '#faf3ec',
@@ -160,6 +161,8 @@ export const styles = StyleSheet.create({
   cardActions: {
     flexDirection: 'row',
     gap: 8,
+    flexShrink: 0,
+    marginLeft: 8,
   },
   actionIconBtn: {
     width: 32,
